@@ -14,7 +14,7 @@ def main(args):
         print("Unoptimized way - Merges will only be done by 3")
         print("===============================================")
 
-        res = unoptimized_computation(int(args.start_level), int(args.target_level))
+        res = unoptimized_computation(args.start_level, args.target_level)
 
         print(f'{res} items needed to merge until level {args.target_level} '
               f'from items level {args.start_level}')
@@ -23,10 +23,15 @@ def main(args):
         print("Optimized way - Merges will be done by 5")
         print("========================================")
 
-        res = optimized_computation(int(args.start_level), int(args.target_level))
+        res = optimized_computation(args.start_level, args.target_level)
 
         print(f'{res} items needed to merge until level {args.target_level} '
               f'from items level {args.start_level}')
+
+    if args.s:
+        print("simulation")
+        print(f"optimized : {optimized_computation(args.start_level, args.target_level, short_answer=False)}, "
+              f"unoptimized : {unoptimized_computation(args.start_level, args.target_level, short_answer=False)}")
 
 
 def test_values(args):
@@ -38,18 +43,24 @@ def test_values(args):
         raise ValueError("Start level must be grater or equal than zero")
 
 
-def unoptimized_computation(start_level, target_level):
+def unoptimized_computation(start_level, target_level, short_answer=True):
     powers = target_level - np.arange(start_level, target_level, 1)
     bases = np.full(fill_value=3, shape=(len(powers),))
 
-    return np.sum(np.power(bases, powers))
+    if short_answer:
+        return np.sum(np.power(bases, powers))
+    else:
+        return np.power(bases, powers)
 
 
-def optimized_computation(start_level, target_level):
+def optimized_computation(start_level, target_level, short_answer=True):
     iterations = target_level - start_level - 1
     res = iter_fct_optimized_mode(3.0, iterations)
 
-    return int(np.sum(res))
+    if short_answer:
+        return int(np.sum(res))
+    else:
+        return res
 
 
 def iter_fct_optimized_mode(n, i):
@@ -69,8 +80,9 @@ def iter_fct_optimized_mode(n, i):
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description="Items calculator for Merge Dragons game")
-    arg_parser.add_argument("--start_level", help="Level of elementary item, e.g item that farmed", default=0)
-    arg_parser.add_argument("--target_level", required=True, help="Level of item wanted")
-    arg_parser.add_argument("--unoptimized", help="Compute for merge by 3", default=False)
+    arg_parser.add_argument("--start_level", help="Level of elementary item, e.g item that farmed", default=0, type=int)
+    arg_parser.add_argument("--target_level", required=True, help="Level of item wanted", type=int)
+    arg_parser.add_argument("--unoptimized", help="Compute for merge by 3", default=False, type=bool)
+    arg_parser.add_argument("-s", help="Active simulation graphs", action="store_true")
 
     main(arg_parser.parse_args())
