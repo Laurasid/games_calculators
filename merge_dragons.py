@@ -29,9 +29,7 @@ def main(args):
               f'from items level {args.start_level}')
 
     if args.s:
-        print("simulation")
-        print(f"optimized : {optimized_computation(args.start_level, args.target_level, short_answer=False)}, "
-              f"unoptimized : {unoptimized_computation(args.start_level, args.target_level, short_answer=False)}")
+        simulation(args.start_level, args.target_level)
 
 
 def test_values(args):
@@ -58,14 +56,14 @@ def optimized_computation(start_level, target_level, short_answer=True):
     res = iter_fct_optimized_mode(3.0, iterations)
 
     if short_answer:
-        return int(np.sum(res))
+        return np.sum(res)
     else:
         return res
 
 
 def iter_fct_optimized_mode(n, i):
     # TODO : try to make ALL merge by 5 with a counter of remains of division
-    res = [n]
+    res = [int(n)]
 
     if i > 0:
         i -= 1
@@ -76,6 +74,40 @@ def iter_fct_optimized_mode(n, i):
             res += iter_fct_optimized_mode(((n - 1) * 5 / 2 + 3), i)
 
     return res
+
+
+def simulation(start_level, target_level):
+    axe = np.arange(start_level + 1, target_level, 1)
+    values_opti = [np.sum(optimized_computation(start_level, target, short_answer=False)) for target in axe]
+    values_unopti = [np.sum(unoptimized_computation(start_level, target, short_answer=False)) for target in axe]
+
+    plt.figure()
+    plt.subplot(211)
+    # ============== Plot config ==============
+    plt.title("Evolution of item cost. (log)")
+    plt.xlim([0, len(axe) + 1])
+    plt.ylabel("Number of base items needed")
+    # ========================================
+
+    plt.semilogy(axe, values_opti, color="green", label="Optimized")
+    plt.semilogy(axe, values_unopti, color="red", label="Unoptimized")
+
+    plt.legend()
+
+    plt.subplot(212)
+    # ============== Plot config ==============
+    plt.title("Evolution of item cost. (lin)")
+    plt.xlabel("Item level")
+    plt.xlim([0, len(axe) + 1])
+    plt.ylabel("Number of base items needed")
+    # ========================================
+
+    plt.plot(axe, values_opti, color="green", label="Optimized")
+    plt.plot(axe, values_unopti, color="red", label="Unoptimized")
+
+    plt.legend()
+
+    plt.show()
 
 
 if __name__ == '__main__':
