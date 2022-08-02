@@ -1,8 +1,11 @@
 import argparse
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def main(args):
+    test_values(args)
+
     print(f"Compute the number of an item of level {args.start_level} "
           f"needed to have the item at level {args.target_level}")
     print("=============================================================================")
@@ -11,31 +14,46 @@ def main(args):
         print("Unoptimized way - Merges will only be done by 3")
         print("===============================================")
 
-        powers = int(args.target_level) - np.arange(int(args.start_level), int(args.target_level), 1)
-        bases = np.full(fill_value=3, shape=(len(powers),))
+        res = unoptimized_computation(int(args.start_level), int(args.target_level))
 
-        print(f'{np.sum(np.power(bases, powers))} items needed to merge until level {args.target_level}')
+        print(f'{res} items needed to merge until level {args.target_level} '
+              f'from items level {args.start_level}')
 
     else:
         print("Optimized way - Merges will be done by 5")
         print("========================================")
 
-        iterations = int(args.target_level) - int(args.start_level) - 1
+        res = optimized_computation(int(args.start_level), int(args.target_level))
 
-        print(f'{int(np.sum(iter_fct_optimized_mode(3.0, iterations)))} '
-              f'items needed to merge until level {args.target_level}')
+        print(f'{res} items needed to merge until level {args.target_level} '
+              f'from items level {args.start_level}')
 
 
 def test_values(args):
-    if args.target_level <= 0:
+    if int(args.target_level) <= 0:
         raise ValueError("Target level must be greater than zero")
-    if args.target_level < args.start_level:
+    if int(args.target_level) < int(args.start_level):
         raise ValueError("Target level must be greater than start level")
-    if args.start_level < 0:
+    if int(args.start_level) < 0:
         raise ValueError("Start level must be grater or equal than zero")
 
 
+def unoptimized_computation(start_level, target_level):
+    powers = target_level - np.arange(start_level, target_level, 1)
+    bases = np.full(fill_value=3, shape=(len(powers),))
+
+    return np.sum(np.power(bases, powers))
+
+
+def optimized_computation(start_level, target_level):
+    iterations = target_level - start_level - 1
+    res = iter_fct_optimized_mode(3.0, iterations)
+
+    return int(np.sum(res))
+
+
 def iter_fct_optimized_mode(n, i):
+    # TODO : try to make ALL merge by 5 with a counter of remains of division
     res = [n]
 
     if i > 0:
